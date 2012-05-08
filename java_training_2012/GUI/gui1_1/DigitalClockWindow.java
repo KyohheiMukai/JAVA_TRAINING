@@ -9,18 +9,17 @@ import java.util.Calendar;
 
 public class DigitalClockWindow extends Frame implements Runnable{
 
-	static Thread th = new Thread();
-	Graphics g;
-
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
+	String time;
+	Font font;
+
 	DigitalClockWindow(){
 		super("Gui1_1");
-
-		g = this.getGraphics();
+		font = new Font("TimesRoman",Font.BOLD,24);
 
 		addWindowListener(new WindowAdapter(){
 			public void windowClosing(WindowEvent e){
@@ -36,16 +35,14 @@ public class DigitalClockWindow extends Frame implements Runnable{
 		while(true){
 
 			Calendar calendar = Calendar.getInstance();
-			int hour_of_day = calendar.get(Calendar.HOUR_OF_DAY );
-			int min = calendar.get(Calendar.MINUTE);
-			int sec = calendar.get(Calendar.SECOND);
-			String time = Integer.toString(hour_of_day) + ":" + Integer.toString(min) + ":" + Integer.toString(sec);
-			System.out.println(time);
+			time = Integer.toString(calendar.get(Calendar.HOUR_OF_DAY ))
+				+ ":" + Integer.toString(calendar.get(Calendar.MINUTE))
+				+ ":" + Integer.toString(calendar.get(Calendar.SECOND));
 
 			repaint();
 
 			try{
-				th.sleep(1000);
+				Thread.sleep(1000);
 			}catch(InterruptedException e){
 				e.printStackTrace();
 			}
@@ -53,26 +50,10 @@ public class DigitalClockWindow extends Frame implements Runnable{
 
 	}
 
-	public void paint(){
+	public void paint(Graphics g){
 
-		Calendar calendar = Calendar.getInstance();
-		g.setFont(new Font("SansSerif", Font.PLAIN, 60));
-
-		int hour_of_day = calendar.get(Calendar.HOUR_OF_DAY );
-		int min = calendar.get(Calendar.MINUTE);
-		int sec = calendar.get(Calendar.SECOND);
-		String time = Integer.toString(hour_of_day) + ":" + Integer.toString(min) + ":" + Integer.toString(sec);
-		System.out.println(time);
+		g.setFont(font);
 		g.drawString(time, 60, 120);
-	}
-
-	public static void main(String[] args) {
-
-		DigitalClockWindow digitalClockWindow = new DigitalClockWindow();
-		digitalClockWindow.setBounds(200,200,500,500);
-		digitalClockWindow.show();
-
-		th.start();
 	}
 
 }
