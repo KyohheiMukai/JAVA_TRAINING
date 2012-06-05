@@ -35,12 +35,12 @@ public class VehicleTest {
 
 	@Test
 	public void testGetSpeed() {
-		assertNotNull(v.getSpeed());
+		assertEquals(v.getSpeed(), 200);
 	}
 
 	@Test
 	public void testGetAngle() {
-		assertNotNull(v.getAngle());
+		assertEquals(v.getAngle(),20.0);
 	}
 
 	@Test

@@ -1,0 +1,13 @@
+3 << 2L-1 ×
+(3L << 2) - 1 ○
+10<12 == 6 > 17 ○ int
+10<<12 == 6 >>17 ×
+13.5e-1 % Float.POSITIVE_INFINITY ×
+Float.POSITIVE_INFINITY + Double.NEGATIVE_INFINITY ○ Float
+Double.NEGATIVE_INFINITY - Float.NEGATIVE_INFINITY ×
+0.0 / -0.0 == -0.0 / 0.0 ×
+Integer.MAX_VALUE + Integer.MIN_VALUE ○ Integer
+Long.MAX_VALUE + 5 ×
+(short)4 * (byte) 10 ○ byte
+(i < 15 ? 1.72e3f : 0) ○ double
+i++ + i++ + --i//iは最初は3 ○ int
