@@ -33,7 +33,7 @@ public class Vehicle implements Cloneable{
 	 * 正しいテストコードが思いつきませんでした…
 	 */
 	public Vehicle clone() throws CloneNotSupportedException{
-		return (Vehicle)clone();
+		return (Vehicle)super.clone();
 	}
 
 	public void turn(double angle){

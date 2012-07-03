@@ -20,10 +20,10 @@ public abstract class SortDouble {
 		return values.length;
 	}
 
-	protected final double probe(int i){
-		curMetrics.probeCnt++;
-		return values[i];
-	}
+//	protected final double probe(int i){
+//		curMetrics.probeCnt++;
+//		return values[i];
+//	}
 
 	protected final int compare(int i, int j){
 		curMetrics.compareCnt++;

@@ -20,7 +20,7 @@ public class PassengerVehicle extends Vehicle implements Cloneable{
 	}
 
 	public PassengerVehicle clone() throws CloneNotSupportedException{
-		return (PassengerVehicle)clone();
+		return (PassengerVehicle)super.clone();
 	}
 
 }

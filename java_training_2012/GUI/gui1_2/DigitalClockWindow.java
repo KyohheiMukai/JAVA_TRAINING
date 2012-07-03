@@ -10,7 +10,6 @@ import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Label;
 import java.awt.List;
 import java.awt.Menu;
 import java.awt.MenuBar;
@@ -380,5 +379,6 @@ public class DigitalClockWindow extends Frame implements Runnable, ActionListene
 		}
 
 	}
+
 
 }
