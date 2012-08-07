@@ -1,0 +1,49 @@
+Thread1 in jareth.hug() trying to invoke cory.hugBack()
+Thread2 in cory.hug() trying to invoke jareth.hugBack()
+Thread1 in jareth.hugBack()
+Thread2 in cory.hugBack()
+
+Thread2 in cory.hug() trying to invoke jareth.hugBack()
+Thread1 in jareth.hug() trying to invoke cory.hugBack()
+Thread2 in cory.hugBack()
+Thread1 in jareth.hugBack()
+
+Thread1 in jareth.hug() trying to invoke cory.hugBack()
+Thread2 in cory.hug() trying to invoke jareth.hugBack()
+Thread1 in jareth.hugBack()
+Thread2 in cory.hugBack()
+
+Thread1 in jareth.hug() trying to invoke cory.hugBack()
+Thread2 in cory.hug() trying to invoke jareth.hugBack()
+Thread1 in jareth.hugBack()
+Thread2 in cory.hugBack()
+
+Thread1 in jareth.hug() trying to invoke cory.hugBack()
+Thread2 in cory.hug() trying to invoke jareth.hugBack()
+Thread1 in jareth.hugBack()
+Thread2 in cory.hugBack()
+
+Thread1 in jareth.hug() trying to invoke cory.hugBack()
+Thread2 in cory.hug() trying to invoke jareth.hugBack()
+Thread1 in jareth.hugBack()
+Thread2 in cory.hugBack()
+
+Thread1 in jareth.hug() trying to invoke cory.hugBack()
+Thread2 in cory.hug() trying to invoke jareth.hugBack()
+Thread2 in cory.hugBack()
+Thread1 in jareth.hugBack()
+
+Thread1 in jareth.hug() trying to invoke cory.hugBack()
+Thread2 in cory.hug() trying to invoke jareth.hugBack()
+Thread1 in jareth.hugBack()
+Thread2 in cory.hugBack()
+
+Thread1 in jareth.hug() trying to invoke cory.hugBack()
+Thread2 in cory.hug() trying to invoke jareth.hugBack()
+Thread1 in jareth.hugBack()
+Thread2 in cory.hugBack()
+
+Thread1 in jareth.hug() trying to invoke cory.hugBack()
+Thread2 in cory.hug() trying to invoke jareth.hugBack()
+Thread1 in jareth.hugBack()
+Thread2 in cory.hugBack()

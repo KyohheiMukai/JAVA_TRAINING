@@ -13,7 +13,6 @@ public class PascalsTriangle {
 		for(int i=0; i<num; i++){
 			p[i][0] = 1;
 			for(int j=1; j<=i; j++){
-
 				if(j==i)
 					p[i][j] = 1;
 				else{

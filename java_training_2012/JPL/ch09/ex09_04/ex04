@@ -8,6 +8,14 @@ Double.NEGATIVE_INFINITY - Float.NEGATIVE_INFINITY ×
 0.0 / -0.0 == -0.0 / 0.0 ×
 Integer.MAX_VALUE + Integer.MIN_VALUE ○ Integer
 Long.MAX_VALUE + 5 ×
-(short)4 * (byte) 10 ○ byte
-(i < 15 ? 1.72e3f : 0) ○ double
+(short)5 * (byte) 10 ○ 計算する時はintになるので格上げ
+(i < 15 ? 1.72e3f : 0) ○ float
 i++ + i++ + --i//iは最初は3 ○ int
+
+
+A.
+3 << 2L -1 int
+(3L << 2) - 1 long
+10 < 12 == 6 > 17 boolean
+基本的には全部正解
+インクリメント・デクリメントが前置か後置かに要注意。

@@ -8,9 +8,12 @@ package ch11.ex11_02;
  */
 public class Attr<E> {
 
+
+
 	private final String name;
 	private E value = null;
 
+	@BugsFixed({"457604","345233"})
 	public Attr(String name){
 		this.name = name;
 	}

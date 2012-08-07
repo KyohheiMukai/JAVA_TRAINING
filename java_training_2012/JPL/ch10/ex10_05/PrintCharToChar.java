@@ -11,6 +11,6 @@ public class PrintCharToChar {
 
 	public static void main(String[] args) {
 		PrintCharToChar p = new PrintCharToChar();
-		p.printChar('c','d');
+		p.printChar('c','k');
 	}
 }
