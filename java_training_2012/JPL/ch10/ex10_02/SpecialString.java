@@ -42,7 +42,8 @@ public class SpecialString {
 
 	public static void main(String[] args) {
 		SpecialString ss = new SpecialString();
-		ss.changeString('\n');
+		char c = ss.changeString('\n');
+		System.out.println(c);
 	}
 
 }

@@ -11,7 +11,7 @@ public class SpecialString {
 		 */
 
 		if(str.contains("\n")){
-			str = str.replace("\n","");
+			str = str.replace("\n","\\n");
 
 		}else if(str.contains("\t")){
 			str = str.replace("\t","\u0009");
@@ -20,7 +20,7 @@ public class SpecialString {
 			str = str.replace("\b","\u0008");
 
 		}else if(str.contains("\r")){
-			str = str.replace("\r","");
+			str = str.replace("\r","\\r");
 
 		}else if(str.contains("\f")){
 			str = str.replace("\f","\u000C");

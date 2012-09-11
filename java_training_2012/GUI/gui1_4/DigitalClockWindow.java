@@ -9,10 +9,12 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Label;
+import java.awt.List;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
@@ -41,6 +43,8 @@ public class DigitalClockWindow extends Frame implements Runnable, ActionListene
 	private Color color;
 	private Color groundColor;
 	private Preferences prefs;
+	private GraphicsEnvironment ge;
+	private String[] fontFamilyNames;
 
 	final private String MENU = "Menu";
 	final private String PROP = "Prop";
@@ -60,6 +64,8 @@ public class DigitalClockWindow extends Frame implements Runnable, ActionListene
 	final private int WHITE_INT = 3;
 	private int colorNum = BLACK_INT;
 	private int bgcNum = WHITE_INT;
+	private String propInitColorStr = BLACK;
+	private String propInitBgcStr = WHITE;
 
 	private int frameWidth = 300;
 	private int frameHeight = 200;
@@ -77,6 +83,9 @@ public class DigitalClockWindow extends Frame implements Runnable, ActionListene
 		super("Gui1_4");
 
 		prefs = Preferences.systemNodeForPackage(this.getClass());
+		ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		fontFamilyNames = ge.getAvailableFontFamilyNames();
+
 
 		addMenuBar();
 
@@ -106,13 +115,22 @@ public class DigitalClockWindow extends Frame implements Runnable, ActionListene
 
 		if(colorNum == BLACK_INT){
 			color = Color.black;
+			propInitColorStr = BLACK;
 		}else if(colorNum == RED_INT){
 			color = Color.red;
+			propInitColorStr = RED;
 		}else{
 			color = Color.blue;
+			propInitColorStr = BLUE;
 		}
 
-		groundColor = (bgcNum == BLACK_INT) ? Color.black : Color.white;
+		if(bgcNum == BLACK_INT){
+			groundColor = Color.black;
+			propInitBgcStr = BLACK;
+		}else{
+			groundColor = Color.white;
+			propInitBgcStr = WHITE;
+		}
 	}
 
 	private void save(){
@@ -252,7 +270,7 @@ public class DigitalClockWindow extends Frame implements Runnable, ActionListene
 
 			GridBagLayout gbl = new GridBagLayout();
 			GridBagConstraints gbc = new GridBagConstraints();
-			setBounds(x+50, y+50, 200, 200);
+			setBounds(x+100, y+100, 400, 200);
 		     Label fontLabel = new Label(FONT);
 		     gbc.gridx = 0;
 		     gbc.gridy = 0;
@@ -260,9 +278,9 @@ public class DigitalClockWindow extends Frame implements Runnable, ActionListene
 		     add(fontLabel);
 
 		     fontChoice = new Choice();
-		     fontChoice.add(Font.SANS_SERIF);
-		     fontChoice.add(Font.MONOSPACED);
-		     fontChoice.add(Font.SERIF);
+		     for(int i=0; i<fontFamilyNames.length; i++)
+		    	 fontChoice.add(fontFamilyNames[i]);
+		     fontChoice.select(font);
 		     gbc.gridx = 1;
 		     gbc.gridy = 0;
 		     gbl.setConstraints(fontChoice, gbc);
@@ -278,6 +296,7 @@ public class DigitalClockWindow extends Frame implements Runnable, ActionListene
 		     sizeChoice.add("20");
 		     sizeChoice.add("60");
 		     sizeChoice.add("80");
+		     sizeChoice.select(size);
 		     gbc.gridx = 1;
 		     gbc.gridy = 1;
 		     gbl.setConstraints(sizeChoice, gbc);
@@ -293,6 +312,7 @@ public class DigitalClockWindow extends Frame implements Runnable, ActionListene
 		     colorChoice.add(BLACK);
 		     colorChoice.add(RED);
 		     colorChoice.add(BLUE);
+		     colorChoice.select(propInitColorStr);
 		     gbc.gridx = 1;
 		     gbc.gridy = 2;
 		     gbl.setConstraints(colorChoice, gbc);
@@ -307,11 +327,11 @@ public class DigitalClockWindow extends Frame implements Runnable, ActionListene
 		     bgcChoice = new Choice();
 		     bgcChoice.add(BLACK);
 		     bgcChoice.add(WHITE);
+		     bgcChoice.select(propInitBgcStr);
 		     gbc.gridx = 1;
 		     gbc.gridy = 3;
 		     gbl.setConstraints(bgcChoice, gbc);
 		     add(bgcChoice);
-
 
 		     addWindowListener(new WindowAdapter(){
 					public void windowClosing(WindowEvent e){
