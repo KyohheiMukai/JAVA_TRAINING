@@ -43,6 +43,7 @@ public class InterpretGui extends JFrame{
 	JButton instanceButton;
 	JButton newInstanceButton;
 	JButton arrayButton;
+	JButton arrayToInstanceButton;
 	JTextField[] text2;
 	JPanel fieldSetPanel;
 	Field[] f;
@@ -67,13 +68,18 @@ public class InterpretGui extends JFrame{
 	ClassLoader loader = ClassLoader.getSystemClassLoader();
 
 	private InstanceGui gui;
+	private boolean isCreatingObject = false;
+	private int controlList = 0;
 	Object createObj = null;
+	Object arrayObj = null;
 
 	private String[] createColumnNames = {"Type","Length"};
 	private String[] arrayColumnNames = {"Type","Name"};
 	private String[] constructorColumnNames = {  "Construcor"};
 
 	InterpretGui(){
+
+		setTitle("Interpret");
 
 		text = new TextFrame();
 		text.setBounds(100, 100, 700, 500);
@@ -144,7 +150,16 @@ public class InterpretGui extends JFrame{
 		gbcPanel.gridy = 1;
 		gbl.setConstraints(newInstanceButton, gbcPanel);
 		constructorPanel.add(newInstanceButton);
+
+		arrayToInstanceButton = new JButton("newInstance(Array)");
+		arrayToInstanceButton.addActionListener(new ArraytoInstanceListener());
+		arrayToInstanceButton.setSize(120, 120);
+		gbcPanel.gridx = 1;
+		gbcPanel.gridy = 2;
+		gbl.setConstraints(arrayToInstanceButton, gbcPanel);
+		constructorPanel.add(arrayToInstanceButton);
 		constructorPanel.setLayout(gbl);
+		constructorPanel.add(arrayToInstanceButton);
 
 		bigPanel = new JPanel();
 		bigPanel.setLayout(new GridLayout(2,3));
@@ -164,13 +179,12 @@ public class InterpretGui extends JFrame{
 	}
 
 	public void callTest(){
-		System.out.println("interpret invoke()");
+		text.append("interpret invoke()");
 	}
 
 	class CreateArrayAndConstructorListener implements ActionListener{
 
 		public void actionPerformed(ActionEvent e) {
-			Object obj;
 
 			try {
 				String aryStr = (String)firstTable.getValueAt(0, 0);
@@ -200,11 +214,11 @@ public class InterpretGui extends JFrame{
 				if((String)firstTable.getValueAt(0, 1) != null){
 					int length = Integer.parseInt((String)firstTable.getValueAt(0, 1));
 
-					obj = Array.newInstance(clazz, length);
+					arrayObj = Array.newInstance(clazz, length);
 
-					int lengthA = Array.getLength(obj);
+					int lengthA = Array.getLength(arrayObj);
 					for(int i=0; i<lengthA; i++){
-						String[] data = {obj.getClass().getComponentType().toString(), Integer.toString(i)};
+						String[] data = {arrayObj.getClass().getComponentType().toString(), Integer.toString(i)};
 						arrayModel.addRow(data);
 					}
 				}
@@ -250,66 +264,74 @@ public class InterpretGui extends JFrame{
 
 		public void valueChanged(ListSelectionEvent e) {
 
-			constructorModel.setRowCount(0);
-			int[] sc = arrayTable.getSelectedRows();
+			if(controlList == 0){
+				if(!isCreatingObject){
+					controlList++;
+					constructorModel.setRowCount(0);
+					int[] sc = arrayTable.getSelectedRows();
 
-			String aryStr = (String)arrayTable.getValueAt(sc[0], 0);
-			Class<?> clazz = null;
-			if(aryStr.startsWith("int")){
-				clazz = int.class;
-			}else if(aryStr.startsWith("char")){
-				clazz = char.class;
-			}else if(aryStr.startsWith("long")){
-				clazz = long.class;
-			}else if(aryStr.startsWith("double")){
-				clazz = double.class;
-			}else if(aryStr.startsWith("float")){
-				clazz = float.class;
-			}else if(aryStr.startsWith("short")){
-				clazz = short.class;
-			}else if(aryStr.startsWith("byte")){
-				clazz = byte.class;
-			}else if(aryStr.startsWith("boolean")){
-				clazz = boolean.class;
+					String aryStr = (String)arrayTable.getValueAt(sc[0], 0);
+					Class<?> clazz = null;
+					if(aryStr.startsWith("int")){
+						clazz = int.class;
+					}else if(aryStr.startsWith("char")){
+						clazz = char.class;
+					}else if(aryStr.startsWith("long")){
+						clazz = long.class;
+					}else if(aryStr.startsWith("double")){
+						clazz = double.class;
+					}else if(aryStr.startsWith("float")){
+						clazz = float.class;
+					}else if(aryStr.startsWith("short")){
+						clazz = short.class;
+					}else if(aryStr.startsWith("byte")){
+						clazz = byte.class;
+					}else if(aryStr.startsWith("boolean")){
+						clazz = boolean.class;
+					}else{
+						try {
+							if(aryStr.startsWith("class"))
+								aryStr = aryStr.replaceAll("class ", "");
+							clazz = Class.forName(aryStr);
+
+						} catch (ClassNotFoundException e1) {
+							text.append("配列の要素からコンストラクタを正しく呼び出せませんでした。");
+						}
+					}
+
+					Constructor<?>[] cons = clazz.getDeclaredConstructors();
+
+					for(int i=0; i<cons.length; i++){
+						Type[] t = cons[i].getGenericParameterTypes();
+						String parameter ="";
+						for(int j=0;j<t.length; j++){
+							parameter += t[j].toString();
+							if(j < t.length -1){
+								parameter += ",";
+							}
+						}
+
+						Type[] exc = cons[i].getGenericExceptionTypes();
+						String excp ="";
+						for(int j=0;j<exc.length; j++){
+							excp += exc[j].toString();
+							if(j < t.length -1){
+								excp += ",";
+							}
+						}
+
+						String[] data = {cons[i].getName() + " (" +parameter + ") throws "+excp};
+						constructorModel.addRow(data);
+					}
+
+					validate();
+
+				}else{
+					isCreatingObject = false;
+				}
 			}else{
-				try {
-					if(aryStr.startsWith("class"))
-						aryStr = aryStr.replaceAll("class ", "");
-					clazz = Class.forName(aryStr);
-
-				} catch (ClassNotFoundException e1) {
-					text.append("配列の要素からコンストラクタを呼び出せませんでした。");
-				}
+				controlList = 0;
 			}
-
-			Constructor<?>[] cons = clazz.getDeclaredConstructors();
-
-			for(int i=0; i<cons.length; i++){
-				Type[] t = cons[i].getGenericParameterTypes();
-				String parameter ="";
-				for(int j=0;j<t.length; j++){
-					parameter += t[j].toString();
-					if(j < t.length -1){
-						parameter += ",";
-					}
-				}
-
-				Type[] exc = cons[i].getGenericExceptionTypes();
-				String excp ="";
-				for(int j=0;j<exc.length; j++){
-					excp += exc[j].toString();
-					if(j < t.length -1){
-						excp += ",";
-					}
-				}
-
-				String[] data = {cons[i].getName() + " (" +parameter + ") throws "+excp};
-				constructorModel.addRow(data);
-			}
-
-			validate();
-			text.append("配列の要素からのコンストラクタ呼び出しに成功しました。");
-
 		}
 
 	}
@@ -352,7 +374,11 @@ public class InterpretGui extends JFrame{
 				text.append(aryStr+" のコンストラクタの呼び出しに成功しました。");
 
 			} catch (ClassNotFoundException e1) {
-				text.append("コンストラクタ呼び出しに失敗しました。");
+				text.append("コンストラクタ呼び出しに失敗しました。(ClassNotFoundException)");
+			} catch (NullPointerException e1) {
+				text.append("コンストラクタ呼び出しに失敗しました。(NullPointerException)");
+			} catch (Exception e1) {
+				text.append("コンストラクタ呼び出しに失敗しました。(Exception)");
 			}
 		}
 
@@ -363,15 +389,15 @@ public class InterpretGui extends JFrame{
 
 		public void actionPerformed(ActionEvent e) {
 
+			isCreatingObject = true;
+
 			Object obj = null;
 			String classname = "InterpretGui";
 
 			try {
-
 				int ii = constructorTable.getSelectedRow();
 				String clsStr = ((String)constructorTable.getValueAt(ii,0));
 				String clsName = clsStr.substring(0, clsStr.indexOf("(")-1);
-				System.out.println("clsName:"+clsName);
 
 				cls = Class.forName(clsName);
 
@@ -391,8 +417,6 @@ public class InterpretGui extends JFrame{
 					Object[] argsObj = new Object[argsString.length];
 
 					for(int i=0; i<argsString.length; i++){
-						System.out.println();
-
 						if(argsString[i].startsWith("int")){
 							args[i] = int.class;
 							String intArgs = argsString[i].substring(4);
@@ -456,9 +480,10 @@ public class InterpretGui extends JFrame{
 						constructor = cls.getConstructor(args);
 						constructor.setAccessible(true);
 						obj = constructor.newInstance(argsObj);
-					}else{
+
+				}else{
 						obj = cls.newInstance();
-					}
+						}
 
 			} catch (SecurityException e1) {
 				text.append("インスタンス生成に失敗しました。 "+classname+":SecurityException");
@@ -480,14 +505,163 @@ public class InterpretGui extends JFrame{
 				text.append("インスタンス生成に失敗しました。 "+classname+":Exception");
 			}
 
-			if(!InstanceGui.isInstanceGuiShow){
-				gui.setVisible(true);
+			try{
+				if(!InstanceGui.isInstanceGuiShow){
+					gui.setVisible(true);
+				}
+				gui.addObj(cls,obj);
+
+				text.append("インスタンス生成に成功しました。");
+
+			}catch(Exception e2){
+				//処理済みなので何もしない。
 			}
-			gui.addObj(cls,obj);
-			text.append("インスタンス生成に成功しました。");
 
 		}
 
 	}
+
+	class ArraytoInstanceListener implements ActionListener{
+
+		public void actionPerformed(ActionEvent e) {
+
+			isCreatingObject = true;
+
+			Object obj = null;
+			String classname = "InterpretGui";
+			int[] sc = null;
+
+			try {
+				int ii = constructorTable.getSelectedRow();
+				String clsStr = ((String)constructorTable.getValueAt(ii,0));
+				String clsName = clsStr.substring(0, clsStr.indexOf("(")-1);
+
+				cls = Class.forName(clsName);
+
+				if(!argsField.getText().equals("")){
+
+					String[] argsString;
+
+					if(argsField.getText().indexOf(",") != -1){
+						argsString = argsField.getText().split(",");
+					}else{
+						argsString = new String[1];
+						argsString[0] = argsField.getText();
+					}
+
+					Constructor<?> constructor;
+					Class<?>[] args = new Class<?>[argsString.length];
+					Object[] argsObj = new Object[argsString.length];
+
+					for(int i=0; i<argsString.length; i++){
+						if(argsString[i].startsWith("int")){
+							args[i] = int.class;
+							String intArgs = argsString[i].substring(4);
+							Class wrapperClass = Class.forName("java.lang.Integer");
+							Object wrapperObj = wrapperClass.getConstructor(String.class).newInstance(intArgs);
+							argsObj[i] =wrapperObj.getClass().getMethod("intValue", null ).invoke(wrapperObj, null);
+						}else if(argsString[i].startsWith("char")){
+							args[i] = char.class;
+							String a = argsString[i].substring(5);
+							Class wrapperClass = Class.forName("java.lang.Character");
+							Object wrapperObj = wrapperClass.getConstructor(String.class).newInstance(a);
+							argsObj[i] =wrapperObj.getClass().getMethod("charValue", null ).invoke(wrapperObj, null);
+						}else if(argsString[i].startsWith("long")){
+							args[i] = long.class;
+							String a = argsString[i].substring(5);
+							Class wrapperClass = Class.forName("java.lang.Long");
+							Object wrapperObj = wrapperClass.getConstructor(String.class).newInstance(a);
+							argsObj[i] =wrapperObj.getClass().getMethod("longValue", null ).invoke(wrapperObj, null);
+						}else if(argsString[i].startsWith("double")){
+							args[i] = double.class;
+							String a = argsString[i].substring(7);
+							Class wrapperClass = Class.forName("java.lang.Double");
+							Object wrapperObj = wrapperClass.getConstructor(String.class).newInstance(a);
+							argsObj[i] =wrapperObj.getClass().getMethod("doubleValue", null ).invoke(wrapperObj, null);
+						}else if(argsString[i].startsWith("float")){
+							args[i] = float.class;
+							String a = argsString[i].substring(6);
+							Class wrapperClass = Class.forName("java.lang.Float");
+							Object wrapperObj = wrapperClass.getConstructor(String.class).newInstance(a);
+							argsObj[i] =wrapperObj.getClass().getMethod("floatValue", null ).invoke(wrapperObj, null);
+						}else if(argsString[i].startsWith("short")){
+							args[i] = short.class;
+							String a = argsString[i].substring(6);
+							Class wrapperClass = Class.forName("java.lang.Short");
+							Object wrapperObj = wrapperClass.getConstructor(String.class).newInstance(a);
+							argsObj[i] =wrapperObj.getClass().getMethod("shortValue", null ).invoke(wrapperObj, null);
+						}else if(argsString[i].startsWith("byte")){
+							args[i] = byte.class;
+							String a = argsString[i].substring(5);
+							Class wrapperClass = Class.forName("java.lang.Byte");
+							Object wrapperObj = wrapperClass.getConstructor(String.class).newInstance(a);
+							argsObj[i] =wrapperObj.getClass().getMethod("byteValue", null ).invoke(wrapperObj, null);
+						}else if(argsString[i].startsWith("boolean")){
+							args[i] = boolean.class;
+							String a = argsString[i].substring(8);
+							Class wrapperClass = Class.forName("java.lang.Boolean");
+							Object wrapperObj = wrapperClass.getConstructor(String.class).newInstance(a);
+							argsObj[i] =wrapperObj.getClass().getMethod("booleanValue", null ).invoke(wrapperObj, null);
+						}else if(argsString[i].startsWith("String")){
+							args[i] = Class.forName("java.lang.String");
+							String a = argsString[i].substring(7);
+							argsObj[i] = args[i].getConstructor(String.class).newInstance(a);
+						}else{
+							if(argsString[i].startsWith("class"))
+								argsString[i] = argsString[i].replaceAll("class ", "");
+							args[i] = Class.forName(argsString[i]);
+							String a = argsString[i].substring(argsString[i].indexOf(" "));
+							argsObj[i] = args[i].getConstructor(String.class).newInstance(a);
+						}
+					}
+						constructor = cls.getConstructor(args);
+						constructor.setAccessible(true);
+						obj = constructor.newInstance(argsObj);
+
+				}else{
+						obj = cls.newInstance();
+				}
+
+				//配列の書き換え
+				sc = arrayTable.getSelectedRows();
+				Array.set(arrayObj, sc[0], obj);
+
+			} catch (SecurityException e1) {
+				text.append("インスタンス生成に失敗しました。 "+classname+":SecurityException");
+			} catch (NoSuchMethodException e1) {
+				text.append("インスタンス生成に失敗しました。 "+classname+":NoSuchMethodException");
+			} catch (IllegalArgumentException e1) {
+				text.append("インスタンス生成に失敗しました。 "+classname+":IllegalArgumentException");
+			} catch (InvocationTargetException e1) {
+				text.append("インスタンス生成に失敗しました。 "+classname+":InvocationTargetException");
+			} catch (InstantiationException e1) {
+				text.append("インスタンス生成に失敗しました。 "+classname+":InstantationException");
+			} catch (IllegalAccessException e1){
+				text.append("インスタンス生成に失敗しました。 "+classname+":IllegalAccessException");
+			} catch (ClassNotFoundException e1) {
+				text.append("インスタンス生成に失敗しました。 "+classname+":ClassNotFoundException");
+			} catch (ClassCastException e1) {
+				text.append("インスタンス生成に失敗しました。 "+classname+":ClassCastException");
+			} catch (Exception e1) {
+				e1.printStackTrace();
+				text.append("インスタンス生成に失敗しました。 "+classname+":Exception");
+			}
+
+			try{
+				if(!InstanceGui.isInstanceGuiShow){
+					gui.setVisible(true);
+				}
+				gui.addObj(cls, Array.get(arrayObj, sc[0]), sc[0]);
+
+				text.append("インスタンス生成に成功しました。");
+
+			}catch(Exception e2){
+				//処理済みなので何もしない。
+			}
+
+		}
+
+	}
+
 
 }

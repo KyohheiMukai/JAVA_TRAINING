@@ -7,11 +7,10 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -61,7 +60,7 @@ public class InstanceGui extends JFrame{
 
 	static boolean isInstanceGuiShow = false;
 	ArrayList<Class<?>> arrayList = new ArrayList<Class<?>>();
-	HashMap<Class<?>, Object> map = new HashMap<Class<?>, Object>();
+	ArrayList<Object> objList = new ArrayList<Object>();
 	Object currentObj = null;
 
 	private String[] fieldColumnNames = { "Field", "Value" };
@@ -71,6 +70,7 @@ public class InstanceGui extends JFrame{
 
 	InstanceGui(TextFrame text){
 
+		setTitle("Instance");
 		this.text = text;
 		setBounds(800,800,700,700);
 		setLocationRelativeTo(null);
@@ -154,8 +154,19 @@ public class InstanceGui extends JFrame{
 
 	public void addObj(Class<?> cls, Object obj){
 		arrayList.add(cls);
-		map.put(cls, obj);
+		objList.add(obj);
 		String objStr = cls.toString();
+		if(objStr.startsWith("class"))
+			objStr = objStr.replaceAll("class ", "");
+		String[] str = {"obj"+Integer.toString(arrayList.size()-1), objStr};
+		instanceModel.addRow(str);
+		validate();
+	}
+
+	public void addObj(Class<?> cls, Object obj, int ary){
+		arrayList.add(cls);
+		objList.add(obj);
+		String objStr = cls.toString() + "[" +ary+"]";
 		if(objStr.startsWith("class"))
 			objStr = objStr.replaceAll("class ", "");
 		String[] str = {"obj"+Integer.toString(arrayList.size()-1), objStr};
@@ -171,12 +182,30 @@ public class InstanceGui extends JFrame{
 
 			int[] sc = instanceTable.getSelectedRows();
 			cls = arrayList.get(sc[0]);
-			currentObj = map.get(cls);
+			currentObj = objList.get(sc[0]);
 
-			f = currentObj.getClass().getDeclaredFields();
-			methods = currentObj.getClass().getDeclaredMethods();
+			f = cls.getDeclaredFields();
+//			methods = cls.getDeclaredMethods();
 
-			    try {
+			@SuppressWarnings("rawtypes")
+			Class tempCls = cls;
+			List<Method> methodsList = new ArrayList<Method>();
+			Method[] tempMethods = null;
+			tempMethods = cls.getDeclaredMethods();
+			for(int i=0; i<tempMethods.length; i++){
+				methodsList.add(tempMethods[i]);
+			}
+			while(tempCls.getSuperclass() != null){
+				tempCls = tempCls.getSuperclass();
+				tempMethods = tempCls.getDeclaredMethods();
+				for(int i=0; i<tempMethods.length; i++){
+					methodsList.add(tempMethods[i]);
+				}
+				System.out.println();
+			}
+			methods = (Method[])methodsList.toArray(new Method[0]);
+
+			try {
 			    	for(int i=0; i<f.length; i++){
 			    		f[i].setAccessible(true);
 			    		String value;
@@ -191,18 +220,43 @@ public class InstanceGui extends JFrame{
 
 					String[] list = new String[methods.length];
 					for(int ii = 0; ii < methods.length; ii++){
+			    		methods[ii].setAccessible(true);
 						Method m = methods[ii];
-							list[ii] = m.getName() + "(";
-							Class<?>[] params = m.getParameterTypes();
-							if(params == null || params.length == 0){
+						m.setAccessible(true);
 
-							}else{
-								for(int j = 0 ; j < params.length; j++){
-									if(j != 0)list[ii]+= ",";
-									list[ii] += params[j].getCanonicalName();
-								}
+						int mod = m.getModifiers();
+
+						list[ii] = "";
+
+						if (Modifier.isPrivate(mod)) {
+							list[ii] += "private ";
+						}
+						if (Modifier.isProtected(mod)) {
+							list[ii] += "protected ";
+						}
+						if (Modifier.isPublic(mod)) {
+							list[ii] += "public ";
+						}
+
+						if (Modifier.isStatic(mod)) {
+							list[ii] += "static ";
+						}
+
+						if (Modifier.isFinal(mod)) {
+							list[ii] += "final ";
+						}
+
+						list[ii] += m.getGenericReturnType().toString() + "  " +m.getName() + "(";
+						Class<?>[] params = m.getParameterTypes();
+						if(params == null || params.length == 0){
+
+						}else{
+							for(int j = 0 ; j < params.length; j++){
+								if(j != 0)list[ii]+= ",";
+								list[ii] += params[j].getCanonicalName();
 							}
-							list[ii] += ")";
+						}
+						list[ii] += ")";
 						}
 
 						String[] sorted  = new String[list.length];
@@ -228,6 +282,8 @@ public class InstanceGui extends JFrame{
 					text.append("インスタンス選択に失敗しました。 :IllegalArgumentException");
 				} catch (IllegalAccessException e1) {
 					text.append("インスタンス選択に失敗しました。 :IllegalAccessException");
+				} catch (Exception e1) {
+					text.append("インスタンス選択に失敗しました。 :Exception");
 				}
 
 			validate();
@@ -281,7 +337,12 @@ public class InstanceGui extends JFrame{
 					f = currentObj.getClass().getDeclaredFields();
 					for(int i=0; i<f.length; i++){
 						f[i].setAccessible(true);
-						String[] fieldSetStrings = {f[i].toString(), f[i].get(currentObj).toString()};
+						String valueStr;
+			    		if(f[i].get(currentObj) ==null)
+			    			valueStr = "null";
+			    		else
+			    			valueStr = f[i].get(currentObj).toString();
+						String[] fieldSetStrings = {f[i].toString(), valueStr};
 						fieldSetModel.addRow(fieldSetStrings);
 			    	}
 					validate();
@@ -312,9 +373,13 @@ public class InstanceGui extends JFrame{
 			if(methods != null){
 
 				String methodName = (String)cbMethod.getSelectedItem();
+				int met = methodName.indexOf("  ");
 				int c = methodName.indexOf("(");
 				int end = methodName.indexOf(")");
-				String m = methodName.substring(0,c);
+				String m = methodName.substring(met+2,c);
+				System.out.println(m);
+
+				Object returnObject = null;
 
 				try {
 					if(end-c > 1){
@@ -377,7 +442,7 @@ public class InstanceGui extends JFrame{
 							}else if(argsString[i].startsWith("[obj")){
 								int en = argsString[i].indexOf("]");
 								args[i] = arrayList.get(Integer.parseInt(argsString[i].substring(4, en)));
-								argsObj[i] = map.get(args[i]);
+								argsObj[i] = objList.get(Integer.parseInt(argsString[i].substring(4, en)));
 							}else{
 								if(argsString[i].startsWith("class"))
 									argsString[i] = argsString[i].replaceAll("class ", "");
@@ -389,32 +454,53 @@ public class InstanceGui extends JFrame{
 
 						Method reflectionMethod = currentObj.getClass().getMethod(m, args);
 						reflectionMethod.setAccessible(true);
-						reflectionMethod.invoke(currentObj, argsObj);
+						returnObject = reflectionMethod.invoke(currentObj, argsObj);
 
 					}else{
 						Method reflectionMethod = cls.getMethod(m);
 						reflectionMethod.setAccessible(true);
-						reflectionMethod.invoke(cls);
+						returnObject = reflectionMethod.invoke(currentObj);
 					}
 
-				} catch (SecurityException e1) {
-					text.append("メソッド呼び出しに失敗しました(SecurityException)");
-				} catch (NoSuchMethodException e1) {
-					text.append("メソッド呼び出しに失敗しました(NoSuchMethodException)");
-				} catch (IllegalArgumentException e1) {
-					text.append("メソッド呼び出しに失敗しました(IllegalArgumentException)");
-				} catch (IllegalAccessException e1) {
-					text.append("メソッド呼び出しに失敗しました(IllegalAccessException)");
-				} catch (InvocationTargetException e1) {
-					text.append("メソッド呼び出しに失敗しました(InvocationTargetException)");
-				} catch (ClassNotFoundException e1) {
-					text.append("メソッド呼び出しに失敗しました(ClassNotFoundException)");
-				} catch (InstantiationException e1) {
-					text.append("メソッド呼び出しに失敗しました(InstantiationException)");
+					if(returnObject != null)
+						text.append(returnObject.toString());
+
+					text.append("メソッド呼び出しに成功しました");
+
+					fieldSetModel.setRowCount(0);
+					f = currentObj.getClass().getDeclaredFields();
+					for(int i=0; i<f.length; i++){
+						f[i].setAccessible(true);
+						String valueStr;
+			    		if(f[i].get(currentObj) ==null)
+			    			valueStr = "null";
+			    		else
+			    			valueStr = f[i].get(currentObj).toString();
+						String[] fieldSetStrings = {f[i].toString(), valueStr};
+						fieldSetModel.addRow(fieldSetStrings);
+			    	}
+
+
+					validate();
+
+				}catch (Exception e1){
+					text.append(""+ e1.getCause()+"");
 				}
-
-				text.append("メソッド呼び出しに成功しました");
-
+//				} catch (SecurityException e1) {
+//					text.append("メソッド呼び出しに失敗しました(SecurityException)");
+//				} catch (NoSuchMethodException e1) {
+//					text.append("メソッド呼び出しに失敗しました(NoSuchMethodException)");
+//				} catch (IllegalArgumentException e1) {
+//					text.append("メソッド呼び出しに失敗しました(IllegalArgumentException)");
+//				} catch (IllegalAccessException e1) {
+//					text.append("メソッド呼び出しに失敗しました(IllegalAccessException)");
+//				} catch (InvocationTargetException e1) {
+//					text.append("メソッド呼び出しに失敗しました("+ e1.getCause()+")");
+//				} catch (ClassNotFoundException e1) {
+//					text.append("メソッド呼び出しに失敗しました(ClassNotFoundException)");
+//				} catch (InstantiationException e1) {
+//					text.append("メソッド呼び出しに失敗しました(InstantiationException)");
+//				}
 			}else{
 				text.append("もう一度やり直してください。");
 			}

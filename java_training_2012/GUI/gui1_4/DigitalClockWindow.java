@@ -296,7 +296,8 @@ public class DigitalClockWindow extends Frame implements Runnable, ActionListene
 		     sizeChoice.add("20");
 		     sizeChoice.add("60");
 		     sizeChoice.add("80");
-		     sizeChoice.select(size);
+		     String sizeStr = Integer.toString(size);
+		     sizeChoice.select(sizeStr);
 		     gbc.gridx = 1;
 		     gbc.gridy = 1;
 		     gbl.setConstraints(sizeChoice, gbc);
