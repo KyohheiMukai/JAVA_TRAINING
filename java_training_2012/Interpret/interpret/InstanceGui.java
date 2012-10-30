@@ -195,11 +195,15 @@ public class InstanceGui extends JFrame{
 			for(int i=0; i<tempMethods.length; i++){
 				methodsList.add(tempMethods[i]);
 			}
+			tempMethods = null;
 			while(tempCls.getSuperclass() != null){
 				tempCls = tempCls.getSuperclass();
 				tempMethods = tempCls.getDeclaredMethods();
 				for(int i=0; i<tempMethods.length; i++){
-					methodsList.add(tempMethods[i]);
+//					if(methodsList.contains(tempMethods[i])){
+//						System.out.println(tempMethods[i].toGenericString() + " " + tempCls.getName());
+						methodsList.add(tempMethods[i]);
+//					}
 				}
 				System.out.println();
 			}
@@ -464,8 +468,6 @@ public class InstanceGui extends JFrame{
 
 					if(returnObject != null)
 						text.append(returnObject.toString());
-
-					text.append("メソッド呼び出しに成功しました");
 
 					fieldSetModel.setRowCount(0);
 					f = currentObj.getClass().getDeclaredFields();

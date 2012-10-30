@@ -1,11 +1,14 @@
 ・PassengerVehicle
 独自にExceptionを拡張する
+Ans.IllegalArgumentException
 
 ・文法エラー
 IOException
+Ans.何かしらのException
 
 ・単語
 NullPointerException
+Ans.nullを返す、もしくはbooleanにしてfalseを返す
 
 ・openメソッド
 IOException

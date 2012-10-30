@@ -11,7 +11,7 @@ public class Ex4 {
 			cls = Class.forName(args[0]);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
-		};
+		}
 		printAnnotation(cls.getAnnotations());
 
 	}

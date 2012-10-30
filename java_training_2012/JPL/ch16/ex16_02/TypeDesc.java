@@ -35,6 +35,7 @@ public class TypeDesc {
 
 			if(cls.getDeclaringClass()!=null){
 				out.print(cls.getCanonicalName() + " in " + cls.getDeclaringClass().getCanonicalName());
+				out.println();
 			}
 
 		}else if(type instanceof ParameterizedType){
