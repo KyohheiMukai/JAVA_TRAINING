@@ -1,4 +1,4 @@
-package ch17.ex17_03;
+package ch17.ex17_05;
 
 import java.lang.ref.PhantomReference;
 import java.lang.ref.Reference;
@@ -10,14 +10,11 @@ public final class ResourceManager {
 
 	final ReferenceQueue<Object> queue;
 	final Map<Reference<?>, Resource> refs;
-	final Thread reaper;
 	boolean shutdown = false;
 
 	public ResourceManager(){
 		queue = new ReferenceQueue<Object>();
 		refs = new HashMap<Reference<?>, Resource>();
-		reaper = new ReaperThread();
-		reaper.start();
 
 		// リソースの初期化
 	}
@@ -25,7 +22,6 @@ public final class ResourceManager {
 	public synchronized void shutdown(){
 		if(!shutdown){
 			shutdown = true;
-			reaper.interrupt();
 		}
 	}
 
@@ -43,8 +39,6 @@ public final class ResourceManager {
 		int keyHash;
 		boolean needsRelease = false;
 
-		//未実装です。。。
-		//やはりわかりませんでした。。。
 		ResourceImpl(Object key) {
 			keyHash = System.identityHashCode(key);
 
@@ -70,26 +64,6 @@ public final class ResourceManager {
 
 		}
 
-	}
-
-	class ReaperThread extends Thread{
-		public void run(){
-			while(true){
-				try{
-					Reference<?> ref = queue.remove();
-					Resource res = null;
-					synchronized (ResourceManager.this) {
-						res = refs.get(ref);
-						refs.remove(ref);
-					}
-					res.release();
-					ref.clear();
-
-				}catch(InterruptedException e){
-					break;
-				}
-			}
-		}
 	}
 
 }
